@@ -3,6 +3,7 @@ from settings import *
 from debug import debug
 from bird import Bird
 from pipe import Pipe
+from cloud import Cloud
 import random
 
 class Level:
@@ -10,10 +11,17 @@ class Level:
         # self.bird = Bird()
         self.display_surface = pygame.display.get_surface()
         self.pipes = []
+        self.FPS = FPS
         x = 700
         for i in range(3):
             self.pipes.append(Pipe(x=x))
             x += 500
+        
+        self.clouds = []
+        x = 200
+        for i in range(3):
+            self.clouds.append(Cloud(x=x))
+            x += 700
         
         self.birds = []
         self.birds_score = {}
@@ -28,14 +36,38 @@ class Level:
 
         self.pipe = Pipe()
         self.can_pass_next_gen = True
+        self.can_accelerate = True
+        self.accelerate_time = pygame.time.get_ticks()
 
     def score_cooldown(self):
         current_time = pygame.time.get_ticks()
         if current_time - self.score_time > 700:
             self.can_score = True
+    
+    def accelerate_cooldown(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.accelerate_time > 700:
+            self.can_accelerate = True
 
     def run(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and self.can_accelerate:
+            if self.FPS == 60:
+                self.FPS = 120
+            else:
+                self.FPS = 60
+            self.can_accelerate = False
+            self.accelerate_time = pygame.time.get_ticks()
+        self.accelerate_cooldown()
         self.can_pass_next_gen = True
+        for cloud in self.clouds:
+            cloud.move()
+            self.display_surface.blit(cloud.img, (cloud.x, cloud.y))
+        
+        if self.clouds[0].x < -CLOUD_WIDTH:
+            self.clouds.pop(0)
+            self.clouds.append(Cloud(x=self.clouds[-1].x + 700))
+
         for i,bird in enumerate(self.birds):
             if not bird.dead:
                 bird.update(self.pipes[0])
@@ -53,7 +85,7 @@ class Level:
 
         if self.pipes[0].x < -PIPE_WIDTH:
             self.pipes.pop(0)
-            self.pipes.append(Pipe(x=self.pipes[-1].x + 500))
+            self.pipes.append(Pipe(x=self.pipes[-1].x + 700))
 
         font = pygame.font.Font(None, 36)
         max_score = max(self.birds_score.values())
@@ -62,7 +94,8 @@ class Level:
         self.display_surface.blit(score_text, score_rect)
 
 
-        if self.bird_alive == 0 and self.can_pass_next_gen:
+        if (self.bird_alive == 0 or max_score == 100) and self.can_pass_next_gen:
+            self.bird_alive = 0
             # self.can_pass_next_gen = False
             self.birds_score = {k: v for k, v in sorted(self.birds_score.items(), key=lambda item: item[1], reverse=True)}
             zero_terms = [k for k, v in self.birds_score.items() if v == 0]
@@ -102,3 +135,8 @@ class Level:
             for i in range(3):
                 self.pipes.append(Pipe(x=x))
                 x += 500
+            self.clouds = []
+            x = 200
+            for i in range(3):
+                self.clouds.append(Cloud(x=x))
+                x += 700

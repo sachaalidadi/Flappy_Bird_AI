@@ -12,12 +12,12 @@ class Network:
                 self.weights = []
                 for weight in weights:
                     # print(weight)
-                    self.weights.append(np.random.normal(weight,0.2))
-                    if weights[-1] > 1:
-                        weights[-1] = 1
-                    elif weights[-1] < -1:
-                        weights[-1] = -1
-                self.bias = np.random.normal(bias,0.2)
+                    self.weights.append(np.random.normal(weight,0.1))
+                    if self.weights[-1] > 1:
+                        self.weights[-1] = 1
+                    elif self.weights[-1] < -1:
+                        self.weights[-1] = -1
+                self.bias = np.random.normal(bias,0.1)
                 if self.bias > 1:
                     self.bias = 1
                 elif self.bias < -1:

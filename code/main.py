@@ -16,7 +16,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-            self.clock.tick(FPS)
+            self.clock.tick(self.level.FPS)
             pygame.display.update()
             self.screen.fill(SKY_BLUE)
             # self.screen.fill((255,0,0), self.level.bird.hitbox)
