@@ -128,7 +128,6 @@ class Level:
                 right_to_reproduce.append(int((self.max_bird_alive-((self.max_bird_alive*0.1-3)*2))*0.5))
                 right_to_reproduce.append(int((self.max_bird_alive-((self.max_bird_alive*0.1-3)*2))*0.3)-1)
                 right_to_reproduce.append(int((self.max_bird_alive-((self.max_bird_alive*0.1-3)*2))*0.2)-1)
-                print(right_to_reproduce)
                 for i in range(3, int(self.max_bird_alive*0.1)):
                     right_to_reproduce.append(1)
                 for i in range(int(self.max_bird_alive*0.1)):
