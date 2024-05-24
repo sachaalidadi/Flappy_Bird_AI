@@ -92,37 +92,62 @@ class Level:
         score_text = font.render("Score: " + str(max_score), True, (255, 255, 255))
         score_rect = score_text.get_rect(center=(WIDTH // 2, 50))
         self.display_surface.blit(score_text, score_rect)
+        bird_alive_text = font.render("Birds Alive: " + str(self.bird_alive), True, (255, 255, 255))
+        bird_alive_rect = bird_alive_text.get_rect(center=(WIDTH // 2, 100))
+        self.display_surface.blit(bird_alive_text, bird_alive_rect)
 
 
         if (self.bird_alive == 0 or max_score == 100) and self.can_pass_next_gen:
             self.bird_alive = 0
-            # self.can_pass_next_gen = False
-            self.birds_score = {k: v for k, v in sorted(self.birds_score.items(), key=lambda item: item[1], reverse=True)}
-            zero_terms = [k for k, v in self.birds_score.items() if v == 0]
-            random.shuffle(zero_terms)
-            # print(zero_terms)
-            for i, key in enumerate(zero_terms):
-                self.birds_score[key] = self.birds_score.pop(zero_terms[i])
-            # print(self.birds_score)
-            keys = list(self.birds_score.keys())
-            self.birds = []
-            for i in range(int(self.max_bird_alive*0.2)):
-                # print(keys[i])
-                weights = self.birds_network[keys[i]]
+            if max_score == 0:
+                self.birds = []
+                for _ in range(int(self.max_bird_alive)):
+                    self.birds.append(Bird())
+                    self.bird_alive+=1
+            elif max_score == 100:
+                self.birds = []
+                weights = self.birds_network[0]
                 bias = weights.pop()
                 self.birds.append(Bird(weights=weights, bias=bias))
                 self.bird_alive+=1
-                for i in range(4):
-                    # if i < 2:
-                    #     self.birds.append(Bird(mutate=True, weights=weights, bias=bias))
-                    #     self.bird_alive+=1
-                    # else:
-                    #     self.birds.append(Bird())
-                    #     self.bird_alive+=1
+                for _ in range(int(self.max_bird_alive)-1):
                     self.birds.append(Bird(mutate=True, weights=weights, bias=bias))
                     self.bird_alive+=1
-            # for i in range(20,100):
-            #     self.birds.append(Bird(weights=self.birds_network[i-50]))
+            else:
+                # self.can_pass_next_gen = False
+                self.birds_score = {k: v for k, v in sorted(self.birds_score.items(), key=lambda item: item[1], reverse=True)}
+                zero_terms = [k for k, v in self.birds_score.items() if v == 0]
+                random.shuffle(zero_terms)
+                # print(zero_terms)
+                for i, key in enumerate(zero_terms):
+                    self.birds_score[key] = self.birds_score.pop(zero_terms[i])
+                # print(self.birds_score)
+                keys = list(self.birds_score.keys())
+                self.birds = []
+                right_to_reproduce = []
+                right_to_reproduce.append(int((self.max_bird_alive-((self.max_bird_alive*0.1-3)*2))*0.5))
+                right_to_reproduce.append(int((self.max_bird_alive-((self.max_bird_alive*0.1-3)*2))*0.3)-1)
+                right_to_reproduce.append(int((self.max_bird_alive-((self.max_bird_alive*0.1-3)*2))*0.2)-1)
+                print(right_to_reproduce)
+                for i in range(3, int(self.max_bird_alive*0.1)):
+                    right_to_reproduce.append(1)
+                for i in range(int(self.max_bird_alive*0.1)):
+                    # print(keys[i])
+                    weights = self.birds_network[keys[i]]
+                    bias = weights.pop()
+                    self.birds.append(Bird(weights=weights, bias=bias))
+                    self.bird_alive+=1
+                    for i in range(right_to_reproduce[i]):
+                        # if i < 2:
+                        #     self.birds.append(Bird(mutate=True, weights=weights, bias=bias))
+                        #     self.bird_alive+=1
+                        # else:
+                        #     self.birds.append(Bird())
+                        #     self.bird_alive+=1
+                        self.birds.append(Bird(mutate=True, weights=weights, bias=bias))
+                        self.bird_alive+=1
+                # for i in range(20,100):
+                #     self.birds.append(Bird(weights=self.birds_network[i-50]))
             self.birds_score = {}
             self.birds_network = {}
             # print(self.bird_alive)
